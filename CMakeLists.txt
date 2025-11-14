@@ -1,14 +1,12 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+cmake_minimum_required (VERSION 3.17)
 
-PROJECT(FileBench)
+project (FileBench LANGUAGES CXX)
 
-SET(CMAKE_CXX_STANDARD 20)
-SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+set (CMAKE_CXX_STANDARD 20)
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
+set (CMAKE_CXX_EXTENSIONS OFF)
 
-IF (MSVC)
-	add_compile_definitions("_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE")
-ENDIF()
-
-ADD_EXECUTABLE(bench bench.cpp)
-
-ADD_EXECUTABLE(simplebench simplebench.cpp)
+add_executable (filebench filebench.cpp)
+if (MSVC)
+	target_compile_definitions (filebench PUBLIC "_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE")
+endif ()

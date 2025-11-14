@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
-#include <cstdio>
 #include <cstdint>
 #include <numeric>
 #include <string>
@@ -9,33 +8,35 @@
 #include <utility>
 #include <vector>
 
-#ifndef _MSC_VER
-#include <unistd.h>
+#if __has_include(<unistd.h>)
+# include <unistd>h>
 #endif
+
+// iostreams are *slow* and we're trying to benchmark,
+// so I'm just going to use printf and fopen.
+#include <cstdio>
 
 using std::chrono::steady_clock;
 using std::chrono::nanoseconds;
 using std::chrono::duration_cast;
 
 
-struct FileList {
+struct FileList
+{
 	std::vector<std::string> mFiles;
 
-	const std::string& operator[](size_t index) const noexcept {
-		return mFiles[index];
-	}
-
-	bool is_valid() const noexcept {
-		return !mFiles.empty();
-	}
+	const std::string& operator[](size_t index) const noexcept { return mFiles[index]; }
+	bool is_valid() const noexcept { return !mFiles.empty(); }
 
 	FileList(size_t count) : mFiles{}
 	{
 		mFiles.resize(count);
-		for (size_t i = 0; i < count; ++i) {
+		for (size_t i = 0; i < count; ++i)
+		{
 			mFiles[i] = "testfile." + std::to_string(i) + ".txt";
 			auto fp = fopen(mFiles[i].c_str(), "w");
-			if (fp == nullptr) {
+			if (fp == nullptr)
+			{
 				fprintf(stderr, "ERROR: Couldn't create %s\n", mFiles[i].c_str());
 				throw std::runtime_error("Unable to create files\n");
 			}
@@ -46,7 +47,8 @@ struct FileList {
 
 	~FileList() noexcept
 	{
-		for (const auto& filename : mFiles) {
+		for (const auto& filename : mFiles)
+		{
 			unlink(filename.c_str());
 		}
 	}
@@ -57,13 +59,16 @@ constexpr auto percentile = [](const auto& timings, size_t percentile) -> size_t
 {
 	const size_t length = timings.size();
 	const size_t point = length * percentile;
-	// If we wouldn't produce a whole number, take the average of the values either side
-	if (((point) % 100) != 0) {
-		auto left = timings[size_t(std::floor(double(point) / 100.))];
-		auto right = timings[size_t(std::ceil(double(point) / 100.))];
-		return (left + right) / 2;
+	// Simple path where the number of samples is an integer multiple of 100.
+	if (((point) % 100) == 0)
+	{
+		return timings[(point / 100)];
 	}
-	return timings[(point / 100)];
+
+	// Otherwise take the average of the values either side of the sample point.
+	const auto left = timings[size_t(std::floor(double(point) / 100.))];
+	const auto right = timings[size_t(std::ceil(double(point) / 100.))];
+	return (left + right) / 2;
 };
 
 
@@ -79,15 +84,19 @@ int main()
 	iterTimings.reserve(NumIters);
 
 	constexpr size_t ReportEvery{ 100 };
-	for (size_t iter = 0; iter < NumIters; ++iter) {
-		if ((iter % ReportEvery) == 0) {
+	for (size_t iter = 0; iter < NumIters; ++iter)
+	{
+		if ((iter % ReportEvery) == 0)
+		{
 			printf("Iter %zu/%zu\n", iter, NumIters);
 		}
 
 		const auto start = steady_clock::now();
-		for (const auto& filename : fileList.mFiles) {
+		for (const auto& filename : fileList.mFiles)
+		{
 			FILE* fp = fopen(filename.c_str(), "r");
-			if (!fp) {
+			if (!fp)
+			{
 				fprintf(stderr, "Unable to open %s\n", filename.c_str());
 				exit(1);
 			}
@@ -112,11 +121,13 @@ int main()
 
 	const char* unit = "ns";
 	uint64_t divisor = 1;
-	if (lowest > 10 * 1000 * 1000) {
+	if (lowest > 10 * 1000 * 1000)
+	{
 		unit = "ms";
 		divisor = 1000 * 1000;
 	}
-	else if (lowest > 10 * 1000) {
+	else if (lowest > 10 * 1000)
+	{
 		unit = "us";
 		divisor = 1000;
 	}	

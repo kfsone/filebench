@@ -7,10 +7,20 @@ for the case of opening a file, and it made the code slightly more portable (loo
 
 # Building
 
-cmake -DCMAKE\_BUILD\_TYPE=Release
-cmake --build . --target SimpleBench
+Configure the build directory:
+```sh
+# Generally
+cmake -DCMAKE_BUILD_TYPE=Release -S . -B build
+# or if toolchain not detected
+# cmake -DCMAKE_BUILD_TYPE=Release -S . -B build -G Ninja
+```
 
-and then run the SimpleBench executable.
+Build the program
+```
+cmake --build build --config Release
+```
+
+and then run the `./build/filebench` or `./build/Release/filebench.exe` executable.
 
 This will create ~1000 one-line text files in the current directory and then repeatedly open them,
 capturing the timing, and then deleting them.

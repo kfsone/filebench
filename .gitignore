@@ -1,4 +1,6 @@
 .vs
-out
+out/
+build/
+wsl/
 tmp
 CMake*.json
